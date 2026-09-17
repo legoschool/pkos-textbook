@@ -1,0 +1,7 @@
+__pycache__/
+*.pyc
+_변환결과/
+tests/_시험자료/
+.idea/
+.venv/
+venv/
