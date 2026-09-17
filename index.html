@@ -1,0 +1,1107 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="파이썬 자료변환기를 설치부터 변환·결과 읽기·코드로 쓰기까지 실제 실행 화면으로 따라 하는 15블록 실습 교재">
+<title>자료변환기 실습 교재</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Do+Hyeon&family=IBM+Plex+Sans+KR:wght@400;500;600;700&family=Nanum+Gothic+Coding:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ground:#e9edf1; --card:#ffffff; --card2:#f5f7f9; --ink:#141c26; --ink2:#465262; --ink3:#77828f;
+  --line:#141c26; --soft:#d5dbe2;
+  --blue:#2d5bd6; --blue-bg:#e3eafb; --yellow:#f3bf1a; --yellow-bg:#fdf3cf;
+  --green:#23915a; --green-bg:#dcf1e5; --red:#dd4637; --red-bg:#fbe3e0;
+  --code-bg:#121820; --code-ink:#e6edf3; --code-dim:#8b98a7;
+  --shadow:4px 4px 0 var(--line); --shadow-sm:3px 3px 0 var(--line);
+  --display:"Do Hyeon","IBM Plex Sans KR",system-ui,sans-serif;
+  --sans:"IBM Plex Sans KR",system-ui,-apple-system,"Malgun Gothic",sans-serif;
+  --mono:"Nanum Gothic Coding",ui-monospace,Consolas,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --ground:#0e1319; --card:#18202a; --card2:#1f2833; --ink:#e7edf3; --ink2:#b3bfcc; --ink3:#8391a0;
+  --line:#000000; --soft:#2d3845; --blue-bg:#1c2a4a; --yellow-bg:#3a3113; --green-bg:#15352a; --red-bg:#3d1f1c;
+  --code-bg:#0a0e13; --blue:#5d86f0; --green:#3fb57a; --red:#f06a5c;
+}}
+:root[data-theme="dark"]{
+  --ground:#0e1319; --card:#18202a; --card2:#1f2833; --ink:#e7edf3; --ink2:#b3bfcc; --ink3:#8391a0;
+  --line:#000000; --soft:#2d3845; --blue-bg:#1c2a4a; --yellow-bg:#3a3113; --green-bg:#15352a; --red-bg:#3d1f1c;
+  --code-bg:#0a0e13; --blue:#5d86f0; --green:#3fb57a; --red:#f06a5c;
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html,body{background:var(--ground);color:var(--ink)}
+body{margin:0;font:15.5px/1.75 var(--sans);word-break:keep-all;overflow-wrap:anywhere;-webkit-font-smoothing:antialiased}
+h1,h2,h3,h4{margin:0;line-height:1.3;text-wrap:balance}
+p{margin:0 0 .8em}
+a{color:var(--blue)}
+button{font:inherit;color:inherit;cursor:pointer}
+:focus-visible{outline:3px solid var(--blue);outline-offset:2px}
+img{max-width:100%;display:block}
+code{font-family:var(--mono);font-size:.92em;background:var(--card2);border:1px solid var(--soft);border-radius:5px;padding:0 5px}
+kbd{font-family:var(--mono);font-size:.85em;border:1.5px solid var(--line);border-bottom-width:3px;border-radius:5px;padding:0 6px;background:var(--card)}
+
+/* 틀 */
+.app{display:grid;grid-template-columns:290px minmax(0,1fr);min-height:100vh}
+.side{position:sticky;top:0;height:100vh;overflow:auto;background:var(--card);border-right:2px solid var(--line);padding:18px 16px 30px}
+.main{min-width:0;padding-inline:28px;padding-block:0 60px}
+.bricks{display:flex;gap:5px;margin-bottom:12px}
+.bricks i{width:24px;height:15px;border:2px solid var(--line);border-radius:3px;display:block}
+.bricks i:nth-child(1){background:var(--blue)}.bricks i:nth-child(2){background:var(--yellow)}
+.bricks i:nth-child(3){background:var(--green)}.bricks i:nth-child(4){background:var(--red)}
+.side .kicker{font:700 11px/1.4 var(--sans);letter-spacing:.08em;color:var(--ink3);text-transform:uppercase}
+.side h1{font:400 24px/1.25 var(--display);margin:4px 0 12px}
+.side .links{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px}
+.chipbtn{border:1.5px solid var(--line);background:var(--blue-bg);border-radius:8px;padding:3px 10px;font-size:13px;font-weight:600;text-decoration:none;color:var(--ink)}
+.side label.s{font-size:12.5px;color:var(--ink2);font-weight:600}
+.side input[type=search]{width:100%;margin:4px 0 12px;border:1.5px solid var(--line);border-radius:8px;padding:7px 10px;font:14px var(--sans);background:var(--card2);color:var(--ink)}
+.prog{font-size:12.5px;color:var(--ink2);font-weight:600;display:flex;justify-content:space-between}
+.pbar{height:10px;border:1.5px solid var(--line);border-radius:6px;background:var(--card2);overflow:hidden;margin:4px 0 14px}
+.pbar i{display:block;height:100%;background:var(--green);width:0;transition:width .3s}
+.nav{list-style:none;margin:0;padding:0;display:grid;gap:3px}
+.nav a{display:grid;grid-template-columns:30px 1fr 16px;align-items:center;gap:8px;padding:6px 8px;border-radius:9px;text-decoration:none;color:var(--ink);font-size:13.5px;line-height:1.35;border:1.5px solid transparent}
+.nav a:hover{background:var(--card2)}
+.nav a.on{background:var(--ink);color:var(--card)}
+.nav .no{font:700 11px/1 var(--mono);border:1.5px solid currentColor;border-radius:5px;padding:4px 0;text-align:center}
+.nav .ph{font-size:10.5px;display:block;color:var(--ink3);margin-top:8px;padding-left:8px;font-weight:700;letter-spacing:.05em}
+.nav a.on .ok{color:var(--card)}
+.nav .ok{color:var(--green);font-weight:700;text-align:center}
+.btn.menu-btn{display:none}
+
+.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:10;display:flex;align-items:center;gap:8px;flex-wrap:wrap;justify-content:flex-end;padding:12px 0;background:var(--ground);border-bottom:2px solid var(--soft);margin-bottom:22px}
+.top .crumb{margin-right:auto;font-size:13.5px;color:var(--ink2);font-weight:600}
+.btn{border:2px solid var(--line);background:var(--card);border-radius:10px;padding:6px 13px;font-size:13.5px;font-weight:600;box-shadow:var(--shadow-sm);text-decoration:none;color:var(--ink);display:inline-flex;align-items:center;gap:6px}
+.btn:hover{transform:translate(-1px,-1px);box-shadow:4px 4px 0 var(--line)}
+.btn:active{transform:translate(2px,2px);box-shadow:1px 1px 0 var(--line)}
+.btn.blue{background:var(--blue);color:#fff}.btn.yellow{background:var(--yellow);color:#141c26}
+.btn.green{background:var(--green);color:#fff}
+.btn small{font-weight:500;opacity:.8}
+
+/* 첫 화면 */
+.hero{background:var(--yellow);color:#141c26;border:2px solid var(--line);border-radius:18px;box-shadow:6px 6px 0 var(--line);padding:30px 32px;position:relative;overflow:hidden}
+.hero .tag{display:inline-block;background:#fff;border:2px solid #141c26;border-radius:7px;padding:1px 10px;font-size:12px;font-weight:700;letter-spacing:.04em;margin-bottom:14px}
+.hero h2{font:400 clamp(30px,5vw,48px)/1.12 var(--display);margin-bottom:14px}
+.hero p{max-width:600px;color:#2c2610}
+.stats{display:flex;gap:28px;flex-wrap:wrap;margin-top:18px}
+.stats b{font:400 30px/1 var(--display);display:block}
+.stats span{font-size:12.5px;font-weight:600}
+.studs{position:absolute;right:26px;bottom:22px;display:grid;grid-template-columns:repeat(4,22px);gap:10px;opacity:.28}
+.studs i{width:22px;height:22px;border-radius:50%;background:#141c26;display:block}
+.card{background:var(--card);border:2px solid var(--line);border-radius:16px;box-shadow:var(--shadow);padding:22px 24px}
+.start{margin-top:22px;display:grid;grid-template-columns:1fr auto;gap:18px;align-items:center}
+.pill{display:inline-block;border:1.5px solid var(--line);border-radius:7px;padding:0 9px;font-size:12px;font-weight:700;background:var(--yellow-bg)}
+.start h3{font:400 26px/1.25 var(--display);margin:8px 0}
+.start .acts{display:grid;gap:10px;justify-items:end}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:18px}
+.two h3{font-size:16px;margin-bottom:6px}
+.two p{margin:0;color:var(--ink2);font-size:14.5px}
+.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;margin-top:22px}
+.bcard{display:block;text-decoration:none;color:var(--ink);background:var(--card);border:2px solid var(--line);border-top-width:8px;border-radius:14px;box-shadow:var(--shadow);padding:14px 18px 16px}
+.bcard:hover{transform:translate(-2px,-2px);box-shadow:6px 6px 0 var(--line)}
+.bcard .no{font:700 11.5px var(--mono);letter-spacing:.06em}
+.bcard h3{font:400 21px/1.3 var(--display);margin:4px 0 4px}
+.bcard p{margin:0 0 10px;color:var(--ink2);font-size:14px}
+.bcard .meta{font-size:12px;color:var(--ink3);font-weight:600}
+.bcard .done{float:right;color:var(--green);font-weight:700;font-size:12px}
+.c-blue{border-top-color:var(--blue)}.c-blue .no{color:var(--blue)}
+.c-yellow{border-top-color:var(--yellow)}.c-yellow .no{color:#9a7400}
+.c-green{border-top-color:var(--green)}.c-green .no{color:var(--green)}
+.c-red{border-top-color:var(--red)}.c-red .no{color:var(--red)}
+.phase-h{font:400 22px var(--display);margin:34px 0 -8px;display:flex;align-items:center;gap:10px}
+.phase-h i{width:18px;height:18px;border:2px solid var(--line);border-radius:4px;display:inline-block}
+
+/* 블록 */
+.bhead{border:2px solid var(--line);border-radius:18px;box-shadow:6px 6px 0 var(--line);padding:24px 28px;color:#fff;background:var(--blue)}
+.bhead.yellow{background:var(--yellow);color:#141c26}.bhead.green{background:var(--green)}.bhead.red{background:var(--red)}
+.bhead .no{font:700 12.5px var(--mono);letter-spacing:.14em;opacity:.9}
+.bhead h2{font:400 clamp(28px,4.4vw,40px)/1.2 var(--display);margin:8px 0}
+.bhead p{margin:0;font-size:14.5px;opacity:.95}
+.bbody{margin-top:22px}
+.bbody h3{font:400 23px/1.3 var(--display);margin:28px 0 10px}
+.bbody h3:first-child{margin-top:0}
+.bbody h4{font-size:15.5px;margin:18px 0 6px}
+.bbody ul,.bbody ol{padding-left:1.3em;margin:0 0 .9em}
+.bbody li{margin-bottom:.35em}
+.bbody .lead{font-size:16.5px}
+.steps{counter-reset:st;list-style:none;padding:0!important}
+.steps>li{position:relative;padding-left:44px;margin-bottom:14px!important}
+.steps>li::before{counter-increment:st;content:counter(st);position:absolute;left:0;top:1px;width:30px;height:30px;border:2px solid var(--line);border-radius:8px;background:var(--yellow);color:#141c26;font:700 15px/26px var(--mono);text-align:center}
+pre.cmd{position:relative;margin:10px 0 16px;background:var(--code-bg);color:var(--code-ink);border:2px solid var(--line);border-radius:12px;padding:40px 16px 14px;font:14px/1.65 var(--mono);overflow-x:auto;white-space:pre}
+pre.cmd::before{content:attr(data-label);position:absolute;left:14px;top:10px;font:600 12px var(--sans);color:var(--code-dim)}
+pre.cmd .copy{position:absolute;right:10px;top:7px;border:1.5px solid #3a4655;background:#1d2631;color:#e6edf3;border-radius:7px;font:600 12px var(--sans);padding:2px 10px}
+pre.cmd .copy:hover{background:#2a3644}
+pre.out{background:var(--card2);color:var(--ink);border:1.5px dashed var(--ink3);border-radius:10px;padding:12px 14px;font:13.5px/1.6 var(--mono);overflow-x:auto;white-space:pre;margin:8px 0 16px}
+pre.cmd .c{color:#7fd19b}
+.note{border:2px solid var(--line);border-radius:12px;padding:12px 16px;margin:14px 0;background:var(--blue-bg)}
+.note b.t{display:block;margin-bottom:2px}
+.note.warn{background:var(--red-bg)}.note.tip{background:var(--green-bg)}.note.why{background:var(--yellow-bg)}
+.note p:last-child,.note ul:last-child{margin-bottom:0}
+.tbl{overflow-x:auto;margin:10px 0 16px;border:2px solid var(--line);border-radius:12px}
+.tbl table{border-collapse:collapse;width:100%;min-width:520px;font-size:14px;background:var(--card)}
+.tbl th,.tbl td{padding:8px 12px;border-bottom:1px solid var(--soft);text-align:left;vertical-align:top}
+.tbl thead th{background:var(--card2);font-size:12.5px;color:var(--ink2)}
+.tbl tr:last-child td{border-bottom:0}
+.tbl td code{white-space:nowrap}
+.shots h3{margin-top:30px}
+.shotgrid{display:grid;gap:18px}
+figure.shot{margin:0;background:var(--card);border:2px solid var(--line);border-radius:14px;box-shadow:var(--shadow);overflow:hidden}
+figure.shot button{display:block;width:100%;padding:0;border:0;background:#0c0c0c;cursor:zoom-in}
+figure.shot img{width:100%;height:auto}
+figure.shot figcaption{padding:10px 14px 12px;border-top:2px solid var(--line);font-size:14px;color:var(--ink2)}
+figure.shot figcaption b{color:var(--blue);display:block;font-size:13px}
+.illus{border:2px solid var(--line);border-radius:14px;background:var(--card);box-shadow:var(--shadow);overflow:hidden;margin:12px 0 18px}
+.illus .cap{padding:9px 14px;border-top:2px solid var(--line);font-size:13.5px;color:var(--ink2)}
+.illus .cap b{color:var(--blue)}
+.turn{border:2px solid var(--green);background:var(--green-bg);border-radius:14px;padding:16px 20px;margin-top:30px}
+.turn h3{font:400 22px var(--display);margin:0 0 6px}
+.turn label{display:flex;gap:10px;align-items:flex-start;font-weight:600;margin-top:10px;cursor:pointer}
+.turn input{width:20px;height:20px;accent-color:var(--green);margin-top:3px;flex:none}
+.memo{margin-top:16px}
+.memo label{font-size:13px;color:var(--ink2);font-weight:600}
+.memo textarea{width:100%;min-height:90px;margin-top:4px;border:2px solid var(--line);border-radius:10px;padding:10px 12px;font:14.5px/1.6 var(--sans);background:var(--card);color:var(--ink);resize:vertical}
+.pn{display:flex;justify-content:space-between;gap:12px;margin-top:22px;flex-wrap:wrap}
+.pn .btn{max-width:48%}
+.foot{margin-top:40px;padding-top:14px;border-top:2px solid var(--soft);font-size:12.5px;color:var(--ink3)}
+.all-sep{height:0;border-top:3px dashed var(--soft);margin:48px 0}
+
+/* 그림 설명(재현) */
+.win{font-family:"Segoe UI",var(--sans);font-size:13px;color:#1b1b1b;background:#f3f3f3}
+.win .bar{display:flex;align-items:center;gap:8px;background:#fff;padding:8px 12px;border-bottom:1px solid #ddd;font-size:12.5px}
+.win .bar i{width:14px;height:14px;background:#3776ab;border-radius:3px;display:inline-block}
+.inst{display:grid;grid-template-columns:150px 1fr;min-height:250px}
+.inst .l{background:linear-gradient(160deg,#3776ab,#ffd343);}
+.inst .r{padding:18px 20px;background:#fff}
+.inst h5{margin:0 0 6px;font-size:17px;font-weight:600;color:#1a1a1a}
+.inst .opt{border:1px solid #bbb;border-radius:4px;padding:8px 10px;margin:10px 0;background:#fafafa}
+.inst .opt b{color:#0b5cad}
+.inst .chk{display:flex;align-items:center;gap:8px;margin-top:8px}
+.inst .chk span{width:14px;height:14px;border:1px solid #555;display:inline-grid;place-items:center;font-size:11px;background:#fff}
+.inst .chk.hl{outline:3px solid #dd4637;outline-offset:3px;border-radius:3px}
+.drag{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:14px;padding:22px 20px;background:#fff}
+.drag .it{display:grid;justify-items:center;gap:6px;font-size:13px}
+.drag .ico{width:58px;height:46px;border-radius:5px;position:relative}
+.drag .folder{background:#f8c34a;border:2px solid #c8961c}
+.drag .folder::before{content:"";position:absolute;left:-2px;top:-9px;width:24px;height:9px;background:#f8c34a;border:2px solid #c8961c;border-bottom:0;border-radius:4px 4px 0 0}
+.drag .cmdf{background:#2b2b2b;border:2px solid #111;color:#ddd;font:10px/44px var(--mono);text-align:center}
+.drag .arrow{font:400 34px var(--display);color:#dd4637}
+
+/* 사진 확대 */
+.lb{position:fixed;inset:0;background:rgba(8,12,16,.86);z-index:60;display:grid;place-items:center;padding:24px}
+.lb img{max-height:88vh;width:auto;max-width:96vw;border:2px solid #000;border-radius:8px;background:#000}
+.lb .x{position:absolute;right:18px;top:14px;background:#fff;border:2px solid #000;border-radius:9px;padding:4px 12px;font-weight:700}
+.toast{position:fixed;left:50%;bottom:calc(22px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--card);border-radius:10px;padding:8px 16px;font-size:14px;font-weight:600;z-index:70;border:2px solid var(--line)}
+
+@media (max-width:900px){
+  .app{grid-template-columns:1fr}
+  .side{position:fixed;inset:0 auto 0 0;width:min(300px,86vw);z-index:40;transform:translateX(-105%);transition:transform .2s;box-shadow:6px 0 0 var(--line)}
+  .side.open{transform:none}
+  .btn.menu-btn{display:inline-flex}
+  .main{padding-inline:16px}
+  .two,.grid{grid-template-columns:1fr}
+  .start{grid-template-columns:1fr}.start .acts{justify-items:start}
+  .hero{padding:24px 20px}
+  .studs{display:none}
+  .pn .btn{max-width:100%}
+  .inst{grid-template-columns:70px 1fr}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+
+</head>
+<body>
+<div class="app">
+  <aside class="side" id="side" aria-label="학습 목차">
+    <div class="bricks" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
+    <div class="kicker">파이썬 실습 교재</div>
+    <h1>자료변환기<br>설치부터 변환까지</h1>
+    <div class="links">
+      <a class="chipbtn" href="#home">학습 지도</a>
+      <a class="chipbtn" href="#all">전체 보기</a>
+    </div>
+    <label class="s" for="q">학습 내용 찾기</label>
+    <input type="search" id="q" placeholder="예: 설치, 자가진단, PATH, 개인정보" autocomplete="off">
+    <div class="prog"><span>완료</span><span id="progTxt">0 / 15</span></div>
+    <div class="pbar"><i id="progBar"></i></div>
+    <ul class="nav" id="nav"></ul>
+  </aside>
+
+  <div class="main">
+    <div class="top">
+      <button class="btn menu-btn" id="menuBtn" aria-controls="side">☰ 목차</button>
+      <span class="crumb" id="crumb">학습 지도</span>
+      <button class="btn blue" data-dl="code">코드 받기 <small>zip</small></button>
+      <button class="btn" data-dl="demo">실습 자료 받기 <small>zip</small></button>
+      <button class="btn" id="exportBtn">학습 기록 내보내기</button>
+    </div>
+    <main id="view"></main>
+    <div class="foot">
+      화면 사진은 2026-09-17 Windows 11 · Python 3.14.7 에서 이 교재의 명령을 실제로 실행해 찍었습니다. 파일 탐색기의 왼쪽 탐색 창은 개인 폴더가 보여 가렸습니다.
+      설치 화면·끌어다 놓기 그림은 설명을 위해 다시 그린 것입니다. 실습 자료의 이름·전화번호 등은 모두 지어낸 것입니다.
+      자료변환기는 MIT 라이선스입니다. 체크와 메모는 이 브라우저에만 저장됩니다.
+    </div>
+  </div>
+</div>
+<div class="lb" id="lb" hidden><button class="x" id="lbX">닫기 Esc</button><img id="lbImg" alt=""></div>
+<div class="toast" id="toast" hidden></div>
+
+<script>
+const PHASES = {
+  "준비": {color: "blue", label: "준비 · 받고 이해하기"},
+  "설치": {color: "yellow", label: "설치 · 파이썬과 라이브러리"},
+  "변환": {color: "green", label: "변환 · 넣고 읽고 다시 돌리기"},
+  "활용": {color: "red", label: "활용 · 지키고 넓히기"},
+};
+
+const BLOCKS = [
+{id: "s00", no: "준비", phase: "준비", title: "코드와 실습 자료 받기",
+ goal: "두 zip 을 받아 C:\\pkos_실습 에 풀고, 폴더 모양을 사진과 대조한다.",
+ desc: "도구 코드와 예시 자료를 받아 알맞은 자리에 푼다.", meta: "화면 사진 1장",
+ turn: "C:\\pkos_실습 아래에 pkos_자료변환기 와 흩어진자료 두 폴더가 나란히 있는 것을 확인했다.",
+ body: String.raw`
+<p class="lead">이 교재는 두 가지를 씁니다. <b>도구 코드</b>와, 실습에 넣을 <b>예시 자료</b>입니다. 둘 다 이 페이지에서 받습니다.</p>
+<div class="tbl"><table><thead><tr><th>받을 파일</th><th>크기</th><th>들어 있는 것</th></tr></thead><tbody>
+<tr><td><b>pkos_자료변환기.zip</b></td><td>159KB</td><td>파이썬 코드와 실행 파일 26개 (engine, tests, 설치.cmd, 변환하기.cmd, pkos.py …)</td></tr>
+<tr><td><b>흩어진자료_예시.zip</b></td><td>1.1MB</td><td>워드·PPT·엑셀·PDF·한글·사진·압축 등 17개. 내용은 모두 지어낸 것</td></tr>
+</tbody></table></div>
+<p><button class="btn blue" data-dl="code">코드 받기</button> &nbsp; <button class="btn" data-dl="demo">실습 자료 받기</button></p>
+
+<h3>압축 풀기</h3>
+<ol class="steps">
+<li><b>C 드라이브에 <code>pkos_실습</code> 폴더를 만듭니다.</b> 파일 탐색기 → 로컬 디스크(C:) → 새로 만들기 → 폴더. 이 교재의 명령과 사진은 모두 이 위치를 기준으로 합니다.</li>
+<li><b>받은 zip 두 개를 그 폴더로 옮깁니다.</b> 받은 파일은 보통 '다운로드' 폴더에 있습니다.</li>
+<li>zip 을 오른쪽 클릭 → <b>모두 압축 풀기</b> → 대상 칸을 <code>C:\pkos_실습</code> 로 고친 뒤 <b>압축 풀기</b>. 두 zip 모두 같은 방법입니다.</li>
+<li>다 풀면 이렇게 됩니다.</li>
+</ol>
+<pre class="out">C:\pkos_실습
+├─ pkos_자료변환기\      ← 도구 (명령은 여기서 실행)
+│   ├─ engine\           변환 엔진 (파이썬 모듈)
+│   ├─ tests\            자가진단
+│   ├─ pkos.py           실행 진입점
+│   ├─ 설치.cmd           처음 한 번 더블클릭
+│   └─ 변환하기.cmd        폴더를 끌어다 놓는 실행기
+└─ 흩어진자료\           ← 변환할 예시 자료 17개</pre>
+<div class="note warn"><b class="t">폴더가 두 번 겹치지 않게</b>
+'모두 압축 풀기'는 zip 이름으로 폴더를 하나 더 만들려고 합니다. 대상 칸이 <code>C:\pkos_실습\pkos_자료변환기</code> 로 되어 있으면 끝의 <code>\pkos_자료변환기</code> 를 지우세요. 이미 <code>pkos_자료변환기\pkos_자료변환기</code> 처럼 겹쳤다면 안쪽 폴더를 한 단계 밖으로 옮기면 됩니다.</div>
+<div class="note why"><b class="t">"Windows의 PC 보호" 창이 뜨면</b>
+인터넷에서 받은 .cmd 파일을 처음 실행할 때 나올 수 있습니다. 이 교재에서 직접 받은 파일이 맞다면 <b>추가 정보 → 실행</b>을 누릅니다. 망설여지면 .cmd 대신 3블록의 명령창 방법을 쓰세요. 결과는 같습니다.</div>
+
+<h3>화면에서 확인할 곳</h3>
+<div class="shotgrid">
+<figure class="shot" data-img="10_explorer_tool" data-cap="사진 · 압축을 푼 도구 폴더|engine·tests 폴더와 pkos.py·설치.cmd·변환하기.cmd 가 보이면 제대로 풀린 것입니다. 11개 항목."></figure>
+</div>`},
+
+{id: "s01", no: "01", phase: "준비", title: "자료변환기로 할 수 있는 일",
+ goal: "이 도구가 무엇을 읽고 무엇을 만들어 내는지 한 문장으로 설명한다.",
+ desc: "흩어진 자료가 마크다운 묶음이 되기까지 다섯 단계를 본다.", meta: "개념 · 확인",
+ turn: "이 도구가 확장자 대신 무엇을 보고 형식을 판단하는지 메모에 한 문장으로 적었다.",
+ body: String.raw`
+<p class="lead">한글·워드·PPT·엑셀·PDF·사진·압축파일이 뒤섞인 폴더를 넣으면, AI와 웹이 읽기 좋은 <b>마크다운(.md) 묶음과 목차</b>가 나옵니다.</p>
+<div class="tbl"><table><thead><tr><th>단계</th><th>하는 일</th><th>맡은 파일</th></tr></thead><tbody>
+<tr><td>1. 모으기</td><td>폴더 안 파일을 모두 모읍니다. desktop.ini 같은 윈도우 잡동사니는 뺍니다. zip 은 풀어서 안까지 봅니다.</td><td><code>engine/pipeline.py</code></td></tr>
+<tr><td>2. 정체 판별</td><td>파일 앞부분 바이트와 ZIP·OLE 안쪽 목록으로 진짜 형식을 알아냅니다. <b>확장자는 믿지 않습니다.</b></td><td><code>engine/sniff.py</code></td></tr>
+<tr><td>3. 읽기</td><td>형식에 맞는 방법으로 글·표·그림을 꺼냅니다. 그림은 원래 있던 자리에 링크로 둡니다.</td><td><code>engine/readers.py</code></td></tr>
+<tr><td>4. 개인정보 가리기</td><td>이름·전화번호·계좌번호 등을 찾아 가리고 보고서를 남깁니다.</td><td><code>engine/privacy_guard.py</code></td></tr>
+<tr><td>5. 기록·목차</td><td>.md 파일과 INDEX.md, 변환 기록 _index.json 을 씁니다.</td><td><code>engine/pipeline.py</code></td></tr>
+</tbody></table></div>
+
+<h3>왜 확장자를 믿지 않나</h3>
+<p>흩어진 자료는 이름이 믿을 게 못 됩니다. 실습 자료에도 일부러 넣어 두었습니다.</p>
+<div class="tbl"><table><thead><tr><th>파일 이름</th><th>실제 정체</th><th>알아내는 근거</th></tr></thead><tbody>
+<tr><td><code>사실은워드.pdf</code></td><td>워드(.docx)</td><td>ZIP 안에 <code>word/document.xml</code> 이 있음</td></tr>
+<tr><td><code>확장자없는발표</code></td><td>파워포인트</td><td>ZIP 안에 <code>ppt/presentation.xml</code> 이 있음</td></tr>
+<tr><td><code>글\cp949메모.txt</code></td><td>옛 윈도우 메모장 글</td><td>UTF-8 로는 안 풀리고 cp949 로 풀림</td></tr>
+</tbody></table></div>
+
+<h3>읽는 형식</h3>
+<div class="tbl"><table><thead><tr><th>갈래</th><th>형식</th></tr></thead><tbody>
+<tr><td>한글</td><td><code>.hwp</code> <code>.hwpx</code> <code>.hml</code></td></tr>
+<tr><td>워드 · 발표 · 표</td><td><code>.docx</code> <code>.pptx</code> <code>.xlsx</code> · 옛 <code>.doc</code> <code>.ppt</code> <code>.xls</code> · <code>.csv</code> <code>.tsv</code></td></tr>
+<tr><td>오픈도큐먼트</td><td><code>.odt</code> <code>.ods</code> <code>.odp</code></td></tr>
+<tr><td>PDF</td><td>글자 PDF · 블로그 백업 PDF(글 단위로 나눔) · 스캔 PDF(글자 인식을 켤 때)</td></tr>
+<tr><td>글</td><td><code>.txt</code> <code>.md</code> <code>.html</code> <code>.json</code> <code>.ipynb</code> 자막 <code>.srt</code> <code>.vtt</code> <code>.smi</code> · 소스코드</td></tr>
+<tr><td>그림 · 압축</td><td><code>.jpg</code> <code>.png</code> <code>.svg</code> 등 · <code>.zip</code></td></tr>
+</tbody></table></div>
+<div class="note"><b class="t">여러 번 돌리는 도구입니다</b>
+자료가 늘면 다시 돌립니다. 바뀐 파일만 새로 만들고 목차는 이어서 씁니다. 11블록에서 직접 확인합니다.</div>`},
+
+{id: "s02", no: "02", phase: "설치", title: "파이썬이 있는지 확인하기",
+ goal: "도구 폴더에서 명령 프롬프트를 열고 python --version 결과를 확인한다. 없으면 설치한다.",
+ desc: "명령 프롬프트를 열고 파이썬 버전을 확인한다. 없으면 설치한다.", meta: "화면 사진 1장 · 그림 1장",
+ turn: "python --version 결과를 메모에 적었다 (예: Python 3.14.7).",
+ body: String.raw`
+<h3>도구 폴더에서 명령 프롬프트 열기</h3>
+<ol class="steps">
+<li>파일 탐색기로 <code>C:\pkos_실습\pkos_자료변환기</code> 폴더를 엽니다.</li>
+<li>위쪽 <b>주소창</b>을 클릭해 경로를 지우고 <code>cmd</code> 를 입력한 뒤 <kbd>Enter</kbd>.</li>
+<li>검은 창이 열리고 맨 아래 줄이 <code>C:\pkos_실습\pkos_자료변환기&gt;</code> 이면 준비 끝입니다. 이 교재의 명령은 모두 이 창에 입력합니다.</li>
+</ol>
+<pre class="cmd" data-label="다른 곳에서 창을 열었다면 먼저 이동">cd /d C:\pkos_실습\pkos_자료변환기</pre>
+
+<h3>버전 확인</h3>
+<pre class="cmd" data-label="명령 프롬프트">python --version</pre>
+<div class="shotgrid"><figure class="shot" data-img="01_python_version" data-cap="사진 · 파이썬이 있을 때|Python 3.14.7 처럼 3.9 이상의 번호가 나오면 3블록으로 갑니다."></figure></div>
+<div class="tbl"><table><thead><tr><th>나온 결과</th><th>뜻</th><th>할 일</th></tr></thead><tbody>
+<tr><td><code>Python 3.9</code> 이상</td><td>준비됨</td><td>3블록으로</td></tr>
+<tr><td><code>Python 3.8</code> 이하</td><td>너무 옛 판</td><td>아래 방법으로 새로 설치</td></tr>
+<tr><td><code>'python'은(는) 내부 또는 외부 명령…</code></td><td>파이썬이 없거나 PATH 에 없음</td><td>아래 방법으로 설치</td></tr>
+<tr><td>Microsoft Store 가 열림</td><td>윈도우의 '앱 실행 별칭'만 있고 파이썬은 없음</td><td>Store 를 닫고 아래 방법으로 설치</td></tr>
+</tbody></table></div>
+
+<h3>파이썬이 없다면</h3>
+<h4>방법 A · 설치.cmd 에게 맡기기 (가장 쉬움)</h4>
+<p>3블록의 <code>설치.cmd</code> 를 더블클릭하면 파이썬이 없을 때 <code>Install Python now? (y/n)</code> 을 묻습니다. <kbd>y</kbd> <kbd>Enter</kbd> 를 누르면 winget 으로 Python 3.13 을 사용자 범위에 설치합니다. 끝나면 <b>창을 닫고 설치.cmd 를 한 번 더</b> 실행합니다.</p>
+<h4>방법 B · 명령 한 줄</h4>
+<pre class="cmd" data-label="명령 프롬프트 (설치.cmd 가 쓰는 것과 같은 명령)">winget install --id Python.Python.3.13 --source winget --scope user</pre>
+<h4>방법 C · python.org 설치 파일</h4>
+<ol class="steps">
+<li><a href="https://www.python.org/downloads/" target="_blank" rel="noopener">python.org/downloads</a> 에서 Windows 용 설치 파일을 받아 실행합니다.</li>
+<li><b>첫 화면 맨 아래 <code>Add python.exe to PATH</code> 를 반드시 체크</b>하고 <b>Install Now</b>.</li>
+<li>설치가 끝나면 <b>명령 프롬프트를 닫았다가 새로 열고</b> <code>python --version</code> 을 다시 확인합니다.</li>
+</ol>
+<div class="illus"><div class="win"><div class="bar"><i></i>Python Setup</div><div class="inst"><div class="l"></div><div class="r">
+<h5>Install Python</h5><div>Select Install Now to install Python with default settings, or choose Customize to enable or disable features.</div>
+<div class="opt"><b>→ Install Now</b><br><span style="color:#555">C:\Users\(사용자)\AppData\Local\Programs\Python\…</span></div>
+<div class="chk"><span>✓</span>Use admin privileges when installing py.exe</div>
+<div class="chk hl"><span>✓</span><b>Add python.exe to PATH</b></div>
+</div></div></div>
+<div class="cap"><b>그림(다시 그림) · 설치 첫 화면</b> — 빨간 테두리 칸을 꼭 체크합니다. 빠뜨리면 명령 프롬프트가 python 을 찾지 못합니다. 판에 따라 화면 모양이 다르면(새 'Python install manager' 등) 화면 안내대로 설치한 뒤, 새 창에서 버전을 확인하면 됩니다.</div></div>
+<div class="note why"><b class="t">새 창이라야 찾습니다</b>
+설치 직후 이미 열려 있던 명령 프롬프트는 새 PATH 를 모릅니다. 창을 닫고 다시 여세요.</div>
+<div class="note"><b class="t">파이썬이 여러 개 깔린 PC</b>
+<code>py -0p</code> 로 목록을 봅니다. 설치.cmd 와 변환하기.cmd 는 <b>명령창의 python</b> 을 먼저 쓰고, 라이브러리도 <code>python --version</code> 에 나온 그 파이썬에 깔립니다. 설치한 파이썬과 실행하는 파이썬이 다르면 "설치 필요" 오류가 납니다.</div>`},
+
+{id: "s03", no: "03", phase: "설치", title: "라이브러리 설치하기",
+ goal: "설치 전 점검 → 설치.cmd 실행 → '다 갖춰졌습니다' 를 확인한다.",
+ desc: "설치.cmd 로 라이브러리 8개를 깔고, 설치 전후를 점검으로 비교한다.", meta: "화면 사진 2장",
+ turn: "python pkos.py --점검 에서 8개 모두 ✔ 와 '다 갖춰졌습니다.' 를 확인했다.",
+ body: String.raw`
+<p class="lead">자료변환기는 PDF·워드·PPT 등을 읽으려고 파이썬 라이브러리 8개를 씁니다. 설치 전후를 <code>--점검</code> 으로 비교해 봅니다.</p>
+<h3>1. 설치 전 점검</h3>
+<pre class="cmd" data-label="명령 프롬프트">python pkos.py --점검</pre>
+<div class="shotgrid"><figure class="shot" data-img="02_before_check" data-cap="사진 · 설치 전|✘ 가 빠진 라이브러리입니다. 이 PC 에는 openpyxl·olefile 만 있었습니다. 맨 아래에 '한 줄로 설치' 명령도 알려 줍니다."></figure></div>
+
+<h3>2. 설치.cmd 더블클릭</h3>
+<ol class="steps">
+<li>파일 탐색기에서 <code>설치.cmd</code> 를 <b>더블클릭</b>합니다. (명령 프롬프트에서 <code>설치.cmd</code> 라고 입력해도 됩니다.)</li>
+<li>파이썬을 찾으면 버전을 보여 주고 곧바로 라이브러리를 받습니다. 처음이면 인터넷 속도에 따라 1~5분 걸립니다.</li>
+<li>파이썬이 없으면 <code>Install Python now? (y/n)</code> 을 묻습니다. 2블록의 방법 A 를 보세요.</li>
+<li>마지막에 목록이 모두 ✔ 이고 <b>다 갖춰졌습니다.</b> 가 나오면 아무 키나 눌러 창을 닫습니다.</li>
+</ol>
+<div class="shotgrid"><figure class="shot" data-img="03_setup_done" data-cap="사진 · 설치 끝|Successfully installed … 아래로 8개가 모두 ✔. 이 PC 에서는 10초쯤 걸렸습니다."></figure></div>
+<div class="note why"><b class="t">.cmd 파일이 영어로만 된 이유</b>
+윈도우 배치 파일에 한글을 넣으면 명령창의 코드페이지(949/65001)에 따라 안내문 줄을 명령으로 실행해 버립니다. 그래서 한글 화면은 모두 <code>pkos.py</code> 가 그립니다. 코드를 고칠 때도 .cmd 에는 한글을 넣지 마세요.</div>
+
+<h3>더블클릭 대신 명령으로</h3>
+<pre class="cmd" data-label="설치.cmd 가 부르는 것과 같음">python pkos.py --설치</pre>
+<pre class="cmd" data-label="또는 pip 로 직접">python -m pip install -r requirements.txt</pre>
+
+<h3>무엇이 깔리나</h3>
+<div class="tbl"><table><thead><tr><th>라이브러리</th><th>쓰임</th></tr></thead><tbody>
+<tr><td><code>pymupdf</code></td><td>PDF 읽기, PDF 속 그림 꺼내기</td></tr>
+<tr><td><code>python-docx</code></td><td>워드 .docx</td></tr>
+<tr><td><code>python-pptx</code></td><td>파워포인트 .pptx</td></tr>
+<tr><td><code>openpyxl</code></td><td>엑셀 .xlsx</td></tr>
+<tr><td><code>olefile</code></td><td>한글 .hwp · 옛 .doc/.ppt/.xls 의 껍데기 열기</td></tr>
+<tr><td><code>xlrd</code></td><td>옛 엑셀 .xls</td></tr>
+<tr><td><code>beautifulsoup4</code></td><td>웹문서 .html</td></tr>
+<tr><td><code>pillow</code></td><td>그림 형식 바꾸기(BMP·TIFF → PNG) · 자가진단의 시험 그림</td></tr>
+</tbody></table></div>
+<p>한글 .hwpx, 텍스트, CSV, JSON, 자막, ZIP 풀기는 라이브러리 없이 파이썬 기본 기능으로 읽습니다.</p>`},
+
+{id: "s04", no: "04", phase: "설치", title: "자가진단으로 확인하기",
+ goal: "--자가진단 을 돌려 '통과 126 · 실패 0' 을 확인한다.",
+ desc: "시험 자료를 만들어 다섯 번 변환하며 126가지를 스스로 판정한다.", meta: "화면 사진 1장",
+ turn: "통과 126 · 실패 0 을 확인했다.",
+ body: String.raw`
+<pre class="cmd" data-label="명령 프롬프트">python pkos.py --자가진단</pre>
+<p>시험 자료 약 50개를 임시 폴더에 코드로 새로 만들고, 실제로 변환한 뒤 결과를 126가지로 판정합니다. 몇 초면 끝나고 임시 폴더는 스스로 지웁니다. <b>다른 PC 로 옮긴 뒤, 코드를 고친 뒤</b>에 꼭 돌려 보세요.</p>
+<div class="shotgrid"><figure class="shot" data-img="04_selftest" data-cap="사진 · 자가진단 끝|맨 아래 '통과 126 · 실패 0 · 건너뜀 0'. 이 PC 에서 3.0초 걸렸습니다."></figure></div>
+
+<h3>다섯 번 돌리는 이유</h3>
+<div class="tbl"><table><thead><tr><th>차례</th><th>하는 일</th><th>확인하는 것</th></tr></thead><tbody>
+<tr><td>형식 판별</td><td>이름이 틀린 파일·확장자 없는 파일·암호 문서</td><td>내용으로 맞게 판별하는가</td></tr>
+<tr><td>1회</td><td>처음 변환</td><td>형식별 읽기, 그림 제자리, 개인정보 가리기</td></tr>
+<tr><td>2회</td><td>아무것도 안 바꾸고 다시</td><td>다시 변환한 것 0개, 파일을 열지도 않음</td></tr>
+<tr><td>3회</td><td>파일 하나 추가 + 하나 수정</td><td>그 둘만 다시 변환, 목차는 합쳐짐</td></tr>
+<tr><td>4회</td><td>앞 3개만 (맛보기)</td><td>목차가 줄지 않음</td></tr>
+<tr><td>5회</td><td>원본 하나 삭제</td><td>'원본이 사라진 문서' 로 옮김, 변환본은 남김</td></tr>
+</tbody></table></div>
+<div class="note warn"><b class="t">실패가 나오면</b>
+<ul>
+<li>그 줄 아래 <code>→</code> 로 시작하는 설명을 먼저 읽습니다.</li>
+<li><code>옛 엑셀</code> 시험만 실패 → <code>xlrd</code> 가 없는 것. <code>웹: 표를 표로</code> 만 실패 → <code>beautifulsoup4</code> 가 없는 것. <code>python pkos.py --점검</code> 으로 확인합니다.</li>
+<li><code>No module named 'PIL'</code> 로 멈춤 → <code>python -m pip install pillow</code></li>
+</ul></div>
+<div class="note tip"><b class="t">시험 폴더를 들여다보고 싶다면</b>
+<pre class="cmd" data-label="명령 프롬프트">python tests\run_tests.py --남기기</pre>
+시험 폴더를 지우지 않고 위치를 알려 줍니다. 변환기가 까다로워하는 파일이 어떤 모양인지 볼 수 있습니다.</div>`},
+
+{id: "s05", no: "05", phase: "변환", title: "실습 자료 살펴보기",
+ goal: "흩어진자료 폴더 17개 파일이 각각 무엇을 시험하려는지 안다.",
+ desc: "예시 자료 17개에 숨겨 둔 까다로운 경우를 미리 알아 둔다.", meta: "개념 · 확인",
+ turn: "확장자가 틀린 파일(사실은워드.pdf)과 확장자가 없는 파일(확장자없는발표)을 폴더에서 찾았다.",
+ body: String.raw`
+<p class="lead">변환할 자료는 <code>C:\pkos_실습\흩어진자료</code> 입니다. 준비 블록에서 실습 자료 zip 을 풀었다면 이미 있습니다.</p>
+<pre class="out">흩어진자료\
+├─ 워드문서.docx · 발표자료.pptx · 성적표.xlsx · 글자PDF.pdf
+├─ 스캔PDF.pdf         ← 글자 없이 그림만 든 PDF (못 읽는 경우 연습)
+├─ 사실은워드.pdf      ← 이름은 PDF, 속은 워드
+├─ 확장자없는발표      ← 확장자가 없는 PPT
+├─ 압축묶음.zip        ← 안에 한글 이름 파일 2개
+├─ 한글\   한글문서.hwpx · 공문.odt
+├─ 글\     cp949메모.txt · 웹페이지.html · 명단.tsv
+├─ 사진\   IMG_0001.jpg      ← 찍은 날짜가 든 사진
+├─ 사본\   성적표 - 복사본.xlsx ← 성적표.xlsx 와 내용이 같음
+├─ 개인정보\ 홍길동 상담기록.txt ← 지어낸 이름
+└─ 옛형식\ 옛엑셀.xls</pre>
+<div class="note why"><b class="t">실습 자료를 못 받았다면</b>
+도구에 든 시험 자료 만들기로 비슷한 자료를 만들 수 있습니다. 파일이 약 50개로 더 많아서, 이후 화면의 숫자는 교재 사진과 달라집니다.
+<pre class="cmd" data-label="명령 프롬프트">python tests\make_fixtures.py ..\흩어진자료</pre>
+<b>주의:</b> 이 명령은 지정한 폴더를 <b>지우고 새로 만듭니다.</b> 반드시 새 이름의 폴더를 지정하세요. 내 자료 폴더를 지정하면 안 됩니다.</div>
+<h3>내 자료로 해 볼 때</h3>
+<ul>
+<li>원본 대신 <b>복사해 둔 폴더</b>로 시작하세요. 도구는 원본을 고치지 않지만, 결과 폴더가 원본 옆에 생깁니다.</li>
+<li>처음에는 파일 20~30개짜리 작은 폴더로 시작합니다.</li>
+<li>개인정보가 든 자료라면 12블록을 먼저 읽으세요.</li>
+</ul>`},
+
+{id: "s06", no: "06", phase: "변환", title: "훑기: 변환 전에 살펴보기",
+ goal: "--훑기 로 폴더 안의 형식과 '이름과 속이 다른 파일' 을 변환 없이 확인한다.",
+ desc: "변환하지 않고 무엇이 몇 개 있는지, 이상한 파일은 없는지 본다.", meta: "화면 사진 1장",
+ turn: "훑기 결과에서 '사실은워드.pdf (.pdf → 워드)' 줄을 찾았다.",
+ body: String.raw`
+<pre class="cmd" data-label="명령 프롬프트">python pkos.py ..\흩어진자료 --훑기</pre>
+<p><code>..\흩어진자료</code> 는 '한 단계 위 폴더(<code>C:\pkos_실습</code>) 안의 흩어진자료' 라는 뜻입니다. 전체 경로로 <code>python pkos.py "C:\pkos_실습\흩어진자료" --훑기</code> 처럼 써도 됩니다. 경로에 공백이 있으면 큰따옴표로 감쌉니다.</p>
+<div class="shotgrid"><figure class="shot" data-img="05_scan" data-cap="사진 · 훑기 결과 (아랫부분)|갈래별·형식별 개수, ⚠ 이름과 속이 다른 파일, 저장 위치가 나옵니다. 창을 위로 올리면 맨 위에 대상과 파일 수(zip 안의 2개를 더해 19개)가 있습니다."></figure></div>
+<h3>화면 읽는 법</h3>
+<div class="tbl"><table><thead><tr><th>줄</th><th>뜻</th></tr></thead><tbody>
+<tr><td>대상 · 파일</td><td>넣은 폴더, 파일 수와 용량. 잡동사니(desktop.ini 등)는 뺀 수</td></tr>
+<tr><td>갈래별</td><td>문서·글·표·발표·압축·그림으로 크게 나눈 개수</td></tr>
+<tr><td>형식별</td><td>워드·PDF·한글처럼 자세히 나눈 개수</td></tr>
+<tr><td>⚠ 이름과 속이 다른 파일</td><td>확장자와 실제 형식이 다른 파일. 내용 기준으로 변환합니다. 확장자가 아예 없는 파일은 여기에 넣지 않습니다</td></tr>
+<tr><td>저장 위치</td><td>결과가 생길 곳. 기본은 원본 옆 <code>_변환결과</code></td></tr>
+</tbody></table></div>
+<div class="note tip"><b class="t">늘 훑기부터</b>
+큰 폴더는 먼저 훑어 규모와 이상한 파일을 확인하고, <code>--맛보기 20</code> 으로 20개만 시험 변환한 뒤 전체를 돌립니다.</div>`},
+
+{id: "s07", no: "07", phase: "변환", title: "파일 정체 확인하기",
+ goal: "--확인 으로 파일의 정체와 판별 근거를 읽고, 매직 넘버가 무엇인지 설명한다.",
+ desc: "이상한 파일 하나의 정체를 확인하고, 판별 코드를 읽어 본다.", meta: "화면 사진 1장 · 코드 읽기",
+ turn: "확장자없는발표 를 --확인 으로 확인하고, 근거 줄을 메모에 적었다.",
+ body: String.raw`
+<pre class="cmd" data-label="명령 프롬프트">python pkos.py ..\흩어진자료\사실은워드.pdf --확인</pre>
+<div class="shotgrid"><figure class="shot" data-img="09_identify" data-cap="사진 · 파일 정체|판별은 워드(docx), 근거는 'ZIP 안에 word/document.xml'. 이름은 .pdf 라서 ⚠ 경고가 붙었습니다."></figure></div>
+<p>폴더를 넣으면 모든 파일을 한 표로 보여 줍니다. 변환은 하지 않습니다.</p>
+<pre class="cmd" data-label="명령 프롬프트">python pkos.py ..\흩어진자료 --확인</pre>
+<pre class="out">파일                  판별          근거
+글자PDF.pdf           PDF           내용(매직 넘버)
+사실은워드.pdf        워드 ⚠        내용(ZIP 안에 word/document.xml)
+확장자없는발표        파워포인트    내용(ZIP 안에 ppt/presentation.xml)
+글\cp949메모.txt      텍스트        확장자+내용(글자파일 확인)
+옛형식\옛엑셀.xls     엑셀(옛형식)  내용(OLE 안에 Workbook)
+한글\한글문서.hwpx    한글          내용(ZIP 안 mimetype=application/hwp+zip)
+…
+17개 · 이름과 속이 다른 파일 1개</pre>
+
+<h3>코드 읽기 — 형식은 어떻게 알아내나</h3>
+<p><code>engine/sniff.py</code> 는 세 단계로 판단합니다.</p>
+<ol>
+<li><b>매직 넘버</b> — 파일 맨 앞 몇 바이트. PDF 는 <code>%PDF</code>, PNG 는 <code>\x89PNG</code> 로 시작합니다.</li>
+<li><b>껍데기 열어 보기</b> — docx·pptx·xlsx·hwpx 는 모두 ZIP 입니다. 안의 파일 목록으로 가릅니다. 옛 형식(.doc .xls .hwp)은 OLE 라는 껍데기라서 안의 저장소 이름을 봅니다.</li>
+<li><b>글자파일</b> — UTF-8 → cp949 순서로 풀어 보고, HTML·JSON·자막처럼 구조가 뚜렷한지 봅니다.</li>
+</ol>
+<pre class="cmd" data-label="engine/sniff.py 일부">_MAGIC = [
+    (0, b"%PDF",                    "pdf"),
+    (0, b"\x89PNG\r\n\x1a\n",       "png"),
+    (0, b"\xff\xd8\xff",            "jpeg"),
+    # …
+]
+
+_ZIP_MARKERS = [
+    ("word/document.xml",     "docx"),
+    ("ppt/presentation.xml",  "pptx"),
+    ("xl/workbook.xml",       "xlsx"),
+    ("Contents/section0.xml", "hwpx"),
+    # …
+]</pre>
+<h4>파이썬에서 직접 해 보기</h4>
+<p>도구 폴더의 명령 프롬프트에서 <code>python</code> 만 입력하면 <code>&gt;&gt;&gt;</code> 가 나옵니다. 한 줄씩 입력하고, 끝낼 때는 <code>exit()</code>.</p>
+<pre class="cmd" data-label="파이썬 대화형 창 (>>>)">from engine import sniff
+k = sniff(r"..\흩어진자료\확장자없는발표")
+print(k.label, k.why)</pre>
+<pre class="out">파워포인트 내용(ZIP 안에 ppt/presentation.xml)</pre>
+<div class="note"><b class="t">r"…" 는 무엇?</b>
+윈도우 경로의 <code>\</code> 를 글자 그대로 쓰라는 표시(raw string)입니다. 빼면 <code>\n</code> 같은 조합이 줄바꿈으로 바뀌어 경로가 깨질 수 있습니다.</div>`},
+];
+
+BLOCKS.push(
+{id: "s08", no: "08", phase: "변환", title: "끌어다 놓아 변환하기",
+ goal: "변환하기.cmd 에 폴더를 끌어다 놓고, 훑기 → y → 변환 끝까지 진행한다.",
+ desc: "명령 없이 폴더를 끌어다 놓아 변환한다.", meta: "화면 사진 2장 · 그림 1장",
+ turn: "변환 끝 화면에서 '이번에 변환 16개 · 사본 1개 · 실패 1개' 를 확인했다.",
+ body: String.raw`
+<ol class="steps">
+<li><code>C:\pkos_실습</code> 을 파일 탐색기로 열고, 창을 하나 더 열어 <code>pkos_자료변환기</code> 폴더를 띄웁니다. <code>흩어진자료</code> 폴더와 <code>변환하기.cmd</code> 가 함께 보이게 놓습니다.</li>
+<li><b><code>흩어진자료</code> 폴더를 마우스로 끌어 <code>변환하기.cmd</code> 위에 놓습니다.</b> 아이콘이 겹칠 때 손을 뗍니다.</li>
+<li>창이 열리며 <b>[1/2] 무엇이 들어 있는지 먼저 봅니다</b> 아래로 훑기 결과가 나오고, 맨 끝에 <code>이대로 변환할까요? (y/n)</code> 을 묻습니다.</li>
+<li><kbd>y</kbd> <kbd>Enter</kbd> → <b>[2/2] 변환합니다</b>. 끝나면 요약이 나옵니다. 아무 키나 눌러 창을 닫습니다.</li>
+</ol>
+<div class="illus"><div class="drag">
+<div class="it"><div class="ico folder"></div><b>흩어진자료</b><span style="color:#666">폴더를 잡고</span></div>
+<div class="arrow">→</div>
+<div class="it"><div class="ico cmdf">C:\&gt;_</div><b>변환하기.cmd</b><span style="color:#666">위에 놓기</span></div>
+</div><div class="cap"><b>그림(다시 그림) · 끌어다 놓기</b> — 파일이 아니라 <b>폴더</b>를 놓습니다. 파일 하나만 놓아도 그 파일만 변환합니다.</div></div>
+
+<h3>화면에서 확인할 곳</h3>
+<div class="shotgrid">
+<figure class="shot" data-img="06_wizard_ask" data-cap="사진 01 · 변환 전 확인|훑기 결과 아래 '이대로 변환할까요? (y/n)'. y 가 아니면 아무것도 바꾸지 않고 끝납니다."></figure>
+<figure class="shot" data-img="07_wizard_done" data-cap="사진 02 · 변환 끝|이번에 변환 16개 · 사본 1개 · 실패 1개. 형식별 개수, 못 읽은 파일, 가린 개인정보, 목차(INDEX.md) 위치가 나옵니다."></figure>
+</div>
+<div class="note why"><b class="t">왜 16개일까</b>
+파일 17개 + zip 안의 2개 = 19개입니다. 여기서 zip 자체(안의 파일을 따로 변환) 1개, 내용이 같은 사본 1개, 글자가 없는 스캔PDF 1개를 빼면 16개입니다.</div>
+<div class="note warn"><b class="t">창이 바로 닫히거나 'Python not found' 가 나오면</b>
+3블록의 설치.cmd 를 먼저 실행하세요. 창이 번쩍하고 사라지면 명령 프롬프트에서 <code>변환하기.cmd "C:\pkos_실습\흩어진자료"</code> 로 실행해 오류 문장을 확인합니다.</div>`},
+
+{id: "s09", no: "09", phase: "변환", title: "명령창으로 변환하기와 옵션",
+ goal: "명령으로 전체 변환, 맛보기, 결과 위치 지정, 다시 만들기를 구분해 쓴다.",
+ desc: "묻지 않고 바로 변환하는 명령과 자주 쓰는 옵션을 익힌다.", meta: "개념 · 실습 · 확인",
+ turn: "--맛보기 3 과 -o 를 함께 써서 결과 폴더를 따로 만들고, md 3개가 생긴 것을 확인했다.",
+ body: String.raw`
+<h3>기본 네 가지</h3>
+<pre class="cmd" data-label="전체 변환 — 끌어다 놓기와 같은 일을 묻지 않고 바로">python pkos.py ..\흩어진자료</pre>
+<p>중간에 끊겨도 다시 실행하면 <b>이어서</b> 합니다. 이미 만든 것은 건너뜁니다.</p>
+<pre class="cmd" data-label="앞 N개만 시험 변환">python pkos.py ..\흩어진자료 --맛보기 5</pre>
+<pre class="cmd" data-label="결과를 다른 곳에 (-o)">python pkos.py ..\흩어진자료 -o C:\pkos_실습\결과2</pre>
+<pre class="cmd" data-label="이미 만든 것도 전부 다시">python pkos.py ..\흩어진자료 --다시</pre>
+
+<h3>실습 · 맛보기 결과를 따로 만들기</h3>
+<pre class="cmd" data-label="명령 프롬프트">python pkos.py ..\흩어진자료 --맛보기 3 -o C:\pkos_실습\맛보기결과</pre>
+<pre class="out">파일 3개를 살펴봅니다.
+완료 — 이번에 변환 3개 · 그대로 둠 0개 · 사본 0개 · 실패 0개 · 0분 0초
+       전체 기록: 문서 3개 · 사본 0개 · 못 읽음 0개
+목차 : C:\pkos_실습\맛보기결과\INDEX.md</pre>
+<p><code>맛보기결과</code> 폴더를 열어 <code>글자PDF_pdf.md</code>, <code>발표자료_pptx.md</code>, <code>사실은워드_pdf.md</code> 3개가 생겼는지 봅니다. 확인했으면 이 폴더는 지워도 됩니다.</p>
+
+<h3>옵션 모음</h3>
+<div class="tbl"><table><thead><tr><th>옵션</th><th>하는 일</th></tr></thead><tbody>
+<tr><td><code>--훑기</code></td><td>변환 없이 현황만 (6블록)</td></tr>
+<tr><td><code>--확인</code></td><td>파일·폴더의 정체만 (7블록)</td></tr>
+<tr><td><code>--맛보기 N</code></td><td>앞 N개만</td></tr>
+<tr><td><code>-o 폴더</code></td><td>결과 위치. 기본은 원본 옆 <code>_변환결과</code></td></tr>
+<tr><td><code>--다시</code></td><td>이미 만든 md 도 다시 만들기</td></tr>
+<tr><td><code>--글자인식 tesseract</code> / <code>claude</code></td><td>사진·스캔 PDF 의 글자 읽기 (14블록)</td></tr>
+<tr><td><code>--개인정보끄기</code> · <code>--보고서원본숨김</code></td><td>개인정보 처리 (12블록)</td></tr>
+<tr><td><code>--그림안꺼냄</code> · <code>--압축안열기</code> · <code>--중복허용</code> · <code>--블로그분리끄기</code></td><td>기능 하나씩 끄기</td></tr>
+<tr><td><code>--최대MB 500</code></td><td>이보다 큰 파일은 건너뜀 (기본 300MB)</td></tr>
+<tr><td><code>--조용히</code></td><td>진행 상황을 화면에 쓰지 않음</td></tr>
+<tr><td><code>--자가진단</code> · <code>--점검</code> · <code>--설치</code></td><td>스스로 검사 · 라이브러리 확인 · 설치</td></tr>
+</tbody></table></div>
+<pre class="cmd" data-label="옵션 전체 보기">python pkos.py --help</pre>
+<div class="note"><b class="t">한글 옵션이 입력하기 불편하면</b>
+영어 이름도 똑같이 됩니다. <code>--scan</code> <code>--check</code> <code>--limit</code> <code>--out</code> <code>--force</code> <code>--ocr</code> <code>--selftest</code> <code>--doctor</code> <code>--setup</code> <code>--quiet</code>. 또 <code>python 변환.py …</code> 로 불러도 <code>pkos.py</code> 와 똑같이 동작합니다.</div>`},
+
+{id: "s10", no: "10", phase: "변환", title: "결과 폴더 읽기",
+ goal: "_변환결과 안의 INDEX.md · md 머리말 · _오류.md 를 열어 각각의 역할을 설명한다.",
+ desc: "목차, 변환된 문서의 머리말, 못 읽은 파일의 이유를 읽는다.", meta: "화면 사진 1장",
+ turn: "INDEX.md 에서 ⚠이름불일치 가 붙은 문서를 찾고, 그 md 의 detected 줄을 메모에 옮겨 적었다.",
+ body: String.raw`
+<div class="shotgrid"><figure class="shot" data-img="11_explorer_result" data-cap="사진 · C:\pkos_실습\흩어진자료\_변환결과|원본 폴더 구조대로 하위 폴더가 생기고, 맨 위에 목차와 기록 파일이 있습니다."></figure></div>
+<div class="tbl"><table><thead><tr><th>파일·폴더</th><th>무엇</th></tr></thead><tbody>
+<tr><td><code>INDEX.md</code></td><td><b>사람이 읽는 목차.</b> 갈래별로 모든 문서의 링크가 있습니다. 결과를 볼 때 여기부터</td></tr>
+<tr><td><code>…_docx.md</code> 등</td><td>변환된 문서. 원래 이름 뒤에 원래 확장자를 붙여 겹치지 않게 합니다</td></tr>
+<tr><td><code>assets\</code></td><td>문서에서 꺼낸 그림. 문서마다 폴더가 따로</td></tr>
+<tr><td><code>_index.json</code></td><td>변환 기록. 다음 실행이 이어받습니다. AI·웹이 읽는 목록이기도 합니다. <b>지우면 처음부터</b> 다시 변환합니다</td></tr>
+<tr><td><code>_오류.md</code></td><td>못 읽은 파일과 이유, 해결 방법</td></tr>
+<tr><td><code>_중복.md</code></td><td>내용이 같아 한 번만 변환한 사본</td></tr>
+<tr><td><code>_개인정보_보고서.md</code></td><td>무엇을 어떻게 가렸는지. <b>가리기 전 원본이 들어 있으니 공유 금지</b> (12블록)</td></tr>
+</tbody></table></div>
+
+<h3>INDEX.md</h3>
+<pre class="out"># 📂 변환 목차
+
+전체 **16개** · 2026-09-17 19:12 갱신
+
+- 문서에서 꺼낸 그림 9장 → &#96;assets/&#96;
+- 이름과 속이 달랐던 파일 1개 (내용 기준으로 변환)
+- 같은 내용이라 건너뛴 사본 1개 → [_중복.md](_중복.md)
+- 못 읽은 파일 1개 → [_오류.md](_오류.md)
+
+## 문서 (5개)
+
+- [글자PDF](글자PDF_pdf.md) · 94자 · 그림 1장 · &#96;글자PDF.pdf&#96;
+- [사실은워드](사실은워드_pdf.md) · 160자 · 그림 1장 · ⚠이름불일치 · &#96;사실은워드.pdf&#96;
+- [워드문서](워드문서_docx.md) · 156자 · 그림 1장 · &#96;워드문서.docx&#96;
+…</pre>
+
+<h3>변환된 문서의 머리말</h3>
+<p>모든 md 맨 위에는 <code>---</code> 로 둘러싼 머리말(YAML)이 있습니다. 결과가 이상할 때는 <b><code>detected</code> 줄</b>부터 봅니다.</p>
+<pre class="out">---
+title: "사실은워드"
+date: 2026-09-17
+source: "사실은워드.pdf"
+format: "docx"
+format_label: "워드"
+group: "문서"
+detected: "내용(ZIP 안에 word/document.xml)"   ← 어떻게 판별했나
+ext: ".pdf"
+ext_mismatch: true                           ← 이름과 속이 다름
+sha256: "f24399131db33143"                   ← 내용 지문 (사본 찾기에 씀)
+chars: 160
+images: 1
+info: "표 1 · 형식불일치 .pdf → docx"
+tags: []
+---
+
+# 사실은워드
+
+*원본 &#96;사실은워드.pdf&#96; · ⚠ 이름은 .pdf 인데 실제로는 워드 · 2026-09-17*
+
+# 이름은 PDF 인 워드
+
+표 앞 문단입니다.
+
+| 항목 | 값 |
+|---|---|
+| 사과 | 3 |</pre>
+
+<h3>_오류.md</h3>
+<pre class="out">| 파일 | 종류 | 이유와 해결 방법 |
+|---|---|---|
+| &#96;스캔PDF.pdf&#96; | PDF | 글자가 없는 PDF 입니다(1쪽). 스캔하거나 사진으로 만든 문서로 보입니다. --글자인식 을 켜면 읽을 수 있습니다. |</pre>
+
+<div class="note tip"><b class="t">md 를 보기 좋게 여는 방법</b>
+<ul>
+<li><b>옵시디언(Obsidian)</b> — <code>_변환결과</code> 폴더를 '보관함으로 열기' 하면 목차 링크와 그림이 그대로 보입니다.</li>
+<li><b>VS Code</b> — 폴더를 열고 md 에서 <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>V</kbd> 로 미리보기.</li>
+<li>메모장으로도 열리지만 표와 그림은 글자로 보입니다.</li>
+</ul></div>`},
+
+{id: "s11", no: "11", phase: "변환", title: "다시 돌리기: 바뀐 것만",
+ goal: "그대로 다시 돌렸을 때, 파일을 추가했을 때, 지웠을 때의 결과를 비교한다.",
+ desc: "여러 번 돌리는 도구답게 바뀐 파일만 새로 만드는지 확인한다.", meta: "화면 사진 1장 · 실습",
+ turn: "새메모.txt 를 추가해 '이번에 변환 1개' 를, 지운 뒤 '원본이 사라진 기록 1개' 를 확인했다.",
+ body: String.raw`
+<h3>1. 아무것도 바꾸지 않고 다시</h3>
+<pre class="cmd" data-label="명령 프롬프트">python pkos.py ..\흩어진자료</pre>
+<div class="shotgrid"><figure class="shot" data-img="08_rerun" data-cap="사진 · 다시 돌리기|이번에 변환 0개 · 그대로 둠 14개. 파일을 열지도 않고 크기·수정시각만 비교해 곧바로 끝납니다. 압축 1개도 지난번과 같아 풀지 않았습니다."></figure></div>
+
+<h3>2. 파일 하나 추가하고 다시</h3>
+<pre class="cmd" data-label="명령 프롬프트 — 흩어진자료 에 메모 한 줄짜리 파일 만들기">echo 새로 추가한 메모입니다&gt; ..\흩어진자료\새메모.txt</pre>
+<pre class="cmd" data-label="다시 변환">python pkos.py ..\흩어진자료</pre>
+<pre class="out">파일 18개를 살펴봅니다.
+완료 — 이번에 변환 1개 · 그대로 둠 14개 · 사본 1개 · 실패 1개 · 0분 0초
+       전체 기록: 문서 17개 · 사본 1개 · 못 읽음 1개 · 풀지 않은 압축 1개(지난번과 같음)</pre>
+
+<h3>3. 그 파일을 지우고 다시</h3>
+<pre class="cmd" data-label="명령 프롬프트">del ..\흩어진자료\새메모.txt</pre>
+<pre class="cmd" data-label="다시 변환">python pkos.py ..\흩어진자료</pre>
+<pre class="out">파일 17개를 살펴봅니다.
+완료 — 이번에 변환 0개 · 그대로 둠 14개 · 사본 1개 · 실패 1개 · 0분 0초
+       전체 기록: 문서 16개 · 사본 1개 · 못 읽음 1개 · 풀지 않은 압축 1개(지난번과 같음)
+  원본이 사라진 기록 1개 → 목차 맨 아래</pre>
+<p>INDEX.md 맨 아래에 <b>## 원본이 사라진 문서 (1개)</b> 가 생깁니다. 변환본 <code>새메모_txt.md</code> 는 지우지 않고 남겨 둡니다.</p>
+
+<h3>정리</h3>
+<div class="tbl"><table><thead><tr><th>상황</th><th>어떻게 되나</th></tr></thead><tbody>
+<tr><td>아무것도 안 바뀜</td><td>파일을 열지도 않고 끝남</td></tr>
+<tr><td>파일을 추가·수정함</td><td>그 파일만 다시 변환, 목차는 이어서 씀</td></tr>
+<tr><td>원본을 지움</td><td>목차 맨 아래 '원본이 사라진 문서' 로 옮김. 변환본은 남김</td></tr>
+<tr><td>도구를 고침 (판 번호가 바뀜)</td><td>원본이 그대로여도 다시 변환</td></tr>
+<tr><td><code>--글자인식</code> 을 켬</td><td>전에 못 읽은 스캔 PDF·사진을 다시 시도</td></tr>
+<tr><td><code>--다시</code></td><td>전부 다시 만듦</td></tr>
+</tbody></table></div>
+<div class="note why"><b class="t">어떻게 '바뀌었는지' 아나 — 코드 읽기</b>
+<code>engine/pipeline.py</code> 의 <code>_unchanged()</code> 는 지난 기록과 <b>크기·수정시각·도구 판</b>이 모두 같으면 그대로 둡니다. 시각만 달라졌다면 SHA-256 지문으로 내용까지 비교합니다.</div>`},
+
+{id: "s12", no: "12", phase: "활용", title: "개인정보 가리기",
+ goal: "무엇이 어떻게 가려지는지, 보고서를 왜 공유하면 안 되는지 설명한다.",
+ desc: "이름·전화번호·계좌번호가 가려지는 모습과 보고서 다루는 법을 익힌다.", meta: "개념 · 실습 · 확인",
+ turn: "홍길동 상담기록 의 md 에서 이름이 '홍**' 으로 가려진 것과, 보고서의 경고 문구를 확인했다.",
+ body: String.raw`
+<p class="lead">개인정보 가리기는 <b>기본으로 켜져</b> 있습니다. 주민등록번호·전화번호·이메일·계좌번호·카드번호·이름·주소·생년월일·차량번호를 찾아 가립니다.</p>
+<h3>실습 자료에서 확인</h3>
+<div class="tbl"><table><thead><tr><th>원본 <code>개인정보\홍길동 상담기록.txt</code></th><th>변환본 <code>개인정보\홍길동 상담기록_txt.md</code></th></tr></thead><tbody>
+<tr><td><code>담당: 홍길동</code><br><code>상담 내용입니다.</code></td><td><code>title: "홍** 상담기록"</code><br><code>담당: 홍**</code><br><code>상담 내용입니다.</code></td></tr>
+</tbody></table></div>
+<p>'담당:' 같은 표시 옆에서 이름을 확인하면, 문서의 다른 곳과 <b>제목에서도</b> 같은 이름을 가립니다. 파일·폴더 <b>이름</b>은 바꾸지 않고 보고서에 알립니다.</p>
+<pre class="out"># 🔒 개인정보 처리 보고서
+
+> ⚠️ 이 파일에는 가리기 전의 원본 개인정보가 그대로 들어 있습니다.
+> 확인이 끝나면 삭제하거나, 절대 공유·게시하지 마세요.
+
+| 종류 | 원본 | 바뀐 값 | 확신도 | 주변 문맥 |
+|------|------|---------|--------|-----------|
+| 이름 | &#96;홍길동&#96; | &#96;홍**&#96; | 확실 | 담당: 홍길동 상담 내용입니다. |
+| 파일이름에 이름 | &#96;홍길동&#96; | &#96;(파일 이름은 그대로)&#96; | 확실 | 경로: 개인정보/홍길동 상담기록.txt |</pre>
+<div class="note warn"><b class="t">꼭 지킬 것</b>
+<ul>
+<li><code>_개인정보_보고서.md</code> 와 <code>_개인정보.json</code> 에는 <b>가리기 전 원본</b>이 들어 있습니다. 확인한 뒤 지우거나, 결과 폴더를 공유할 때 반드시 빼세요.</li>
+<li><code>--보고서원본숨김</code> 을 붙이면 보고서에 건수와 바뀐 값만 남습니다.</li>
+<li>자동 탐지는 완벽하지 않습니다. 공개하기 전에는 사람이 직접 점검합니다.</li>
+</ul></div>
+<pre class="cmd" data-label="보고서에 원본을 남기지 않기">python pkos.py ..\흩어진자료 --다시 --보고서원본숨김</pre>
+
+<h3>잘못 가리지 않도록 고친 것</h3>
+<p>학교 업무 문서용으로 만든 규칙을 대학원·수업 자료에 쓰니 새 문제가 나와 <code>engine/privacy_guard.py</code> 에서 보정했습니다.</p>
+<div class="tbl"><table><thead><tr><th>문제</th><th>예</th><th>처리</th></tr></thead><tbody>
+<tr><td>논문 DOI 를 카드·주민번호로</td><td><code>doi.org/10.1177/1365480216659733</code></td><td>주소·DOI·ISBN 의 일부면 가리지 않음</td></tr>
+<tr><td>표 속 연도를 카드번호로</td><td><code>2016 2017 2018 2019</code></td><td>숫자 나열이면 아님. '카드' 표시가 없으면 검증식(Luhn)을 통과해야 가림</td></tr>
+<tr><td>흔한 낱말을 이름으로</td><td><code>파일 이름 설정</code> → <code>설*</code></td><td>같은 낱말이 '설정에서'처럼 쓰이면 이름 아님</td></tr>
+<tr><td>인용 속 저자를 이름으로</td><td><code>이상수(2024)</code></td><td>인용 꼴이면 공개된 저자로 보고 가리지 않음</td></tr>
+<tr><td>계좌번호를 놓침</td><td><code>계좌: 신한 110-…</code></td><td>은행 이름이 끼어도 가림</td></tr>
+</tbody></table></div>`},
+
+{id: "s13", no: "13", phase: "활용", title: "파이썬 코드로 직접 쓰기",
+ goal: "엔진을 불러 쓰는 파이썬 파일을 만들어 실행하고, 결과 기록을 코드로 읽는다.",
+ desc: "내_첫_변환.py 를 만들어 판별·변환·기록 읽기를 코드로 한다.", meta: "코드 · 실습 · 확인",
+ turn: "내_첫_변환.py 를 실행해 제목 5개가 출력되는 것을 확인했다.",
+ body: String.raw`
+<p class="lead">명령 대신 파이썬 코드에서 엔진을 직접 부를 수 있습니다. 내 수업 자료 정리 도구를 만들 때 출발점이 됩니다.</p>
+<h3>1. 파일 만들기</h3>
+<ol class="steps">
+<li>메모장(또는 VS Code·PyCharm)을 열고 아래 코드를 붙여 넣습니다. 오른쪽 위 <b>복사</b> 단추를 쓰세요.</li>
+<li><code>C:\pkos_실습\pkos_자료변환기</code> 폴더에 <code>내_첫_변환.py</code> 로 저장합니다. 메모장이라면 '파일 형식: 모든 파일', '인코딩: UTF-8' 을 고릅니다.</li>
+</ol>
+<pre class="cmd" data-label="내_첫_변환.py">
+# 내_첫_변환.py — pkos_자료변환기 폴더 안에 저장하고 실행합니다
+import json
+from engine import sniff, Converter, Settings
+
+# 1) 파일 하나의 정체를 내용으로 알아봅니다
+k = sniff(r"..\흩어진자료\사실은워드.pdf")
+print("형식:", k.label, "| 이름과 다름:", k.mismatch)
+print("근거:", k.why)
+
+# 2) 폴더를 통째로 변환합니다 (결과는 원본 옆 _변환결과)
+c = Converter(Settings(src=r"..\흩어진자료", verbose=False))
+r = c.run()
+print(f"이번에 변환 {r['done']}개 · 그대로 {r['unchanged']}개 · 사본 {r['duplicates']}개 · 실패 {r['failed']}개")
+
+# 3) 변환 기록(_index.json)에서 제목만 뽑아 봅니다
+idx = json.load(open(r"..\흩어진자료\_변환결과\_index.json", encoding="utf-8"))
+for d in idx["문서"][:5]:
+    print("-", d["title"], "→", d["md"])</pre>
+<h3>2. 실행</h3>
+<pre class="cmd" data-label="명령 프롬프트">python 내_첫_변환.py</pre>
+<pre class="out">형식: 워드 | 이름과 다름: True
+근거: 내용(ZIP 안에 word/document.xml)
+이번에 변환 0개 · 그대로 14개 · 사본 1개 · 실패 1개
+- 홍** 상담기록 → 개인정보/홍길동 상담기록_txt.md
+- cp949메모 → 글/cp949메모_txt.md
+- 명단 → 글/명단_tsv.md
+- 웹페이지 → 글/웹페이지_html.md
+- 글자PDF → 글자PDF_pdf.md</pre>
+<p>이미 8~11블록에서 변환했으므로 '이번에 변환 0개' 입니다. 결과 폴더를 지우고 실행하면 16개가 나옵니다.</p>
+
+<h3>코드 풀이</h3>
+<div class="tbl"><table><thead><tr><th>부분</th><th>뜻</th></tr></thead><tbody>
+<tr><td><code>from engine import …</code></td><td>도구 폴더의 <code>engine</code> 패키지에서 세 가지를 가져옵니다. 그래서 파일을 <b>도구 폴더 안에</b> 저장해야 합니다</td></tr>
+<tr><td><code>sniff(경로)</code></td><td>파일의 정체를 <code>FileKind</code> 로 돌려줍니다. <code>.fmt</code> <code>.label</code> <code>.mismatch</code> <code>.why</code></td></tr>
+<tr><td><code>Settings(src=…, out=…, verbose=…)</code></td><td>변환 설정. 명령의 옵션과 같은 이름들이 있습니다 (<code>skip_existing</code>, <code>privacy_on</code>, <code>ocr_engine</code> …)</td></tr>
+<tr><td><code>Converter(설정).run(limit=N)</code></td><td>변환. 결과 개수를 사전으로 돌려줍니다. <code>.scan()</code> 은 훑기만</td></tr>
+<tr><td><code>_index.json</code> 의 <code>"문서"</code></td><td>문서마다 <code>src</code> <code>md</code> <code>title</code> <code>format</code> <code>chars</code> <code>images</code> … 가 들어 있습니다</td></tr>
+</tbody></table></div>
+<div class="note tip"><b class="t">더 해 보기</b>
+<ul>
+<li>3) 의 <code>[:5]</code> 를 지워 전체 제목을 봅니다.</li>
+<li><code>d["group"] == "발표"</code> 인 것만 골라 출력해 봅니다.</li>
+<li><code>Settings(..., privacy_on=False)</code> 와 <code>out=r"C:\pkos_실습\결과3"</code> 로 바꿔 차이를 비교합니다.</li>
+</ul></div>
+
+<h3>PyCharm 에서 열 때</h3>
+<ul>
+<li>폴더를 열 때 <b>새 가상환경(venv)을 만들지 마세요.</b> 라이브러리를 깐 파이썬(<code>python --version</code> 에 나온 것)을 고릅니다. 이미 만들었다면 PyCharm 터미널에서 <code>pip install -r requirements.txt</code>.</li>
+<li>▶ 로 <code>pkos.py</code> 를 돌리려면 <b>Run → Edit Configurations → + → Python</b> 에서 Script path 를 <code>pkos.py</code>, Parameters 를 <code>..\흩어진자료 --훑기</code> 로 넣습니다. 인자가 없으면 도움말만 나옵니다.</li>
+</ul>`},
+
+{id: "s14", no: "14", phase: "활용", title: "막혔을 때 · 글자 인식",
+ goal: "증상에 맞는 확인 위치를 찾고, 스캔 문서를 읽고 싶을 때의 선택지를 안다.",
+ desc: "오류 증상별 해결법과, 선택 기능인 글자 인식(OCR)을 정리한다.", meta: "개념 · 확인",
+ turn: "내가 겪은 오류(또는 겪을 법한 오류) 하나를 골라 해결 순서를 메모에 적었다.",
+ body: String.raw`
+<h3>증상별 해결</h3>
+<div class="tbl"><table><thead><tr><th>증상</th><th>확인·해결</th></tr></thead><tbody>
+<tr><td><code>'python'은(는) 내부 또는 외부 명령…</code></td><td>파이썬이 없거나 PATH 에 없음. 2블록. 설치 직후라면 <b>새 명령창</b>에서 다시</td></tr>
+<tr><td>설치했는데도 <code>… 설치 필요</code></td><td>다른 파이썬에 깔렸을 수 있음. <code>python --version</code> · <code>py -0p</code> 로 확인하고 그 파이썬으로 <code>python pkos.py --설치</code></td></tr>
+<tr><td>자가진단이 <code>No module named 'PIL'</code> 로 멈춤</td><td><code>python -m pip install pillow</code></td></tr>
+<tr><td>자가진단에서 옛 엑셀·웹 표 시험만 실패</td><td><code>xlrd</code> · <code>beautifulsoup4</code> 없음. <code>python pkos.py --점검</code></td></tr>
+<tr><td>.cmd 가 이상한 오류 (<code>'끝' is not recognized</code> 등)</td><td>.cmd 파일에 한글이 들어갔는지 확인. .cmd 는 영어로만</td></tr>
+<tr><td>'Windows의 PC 보호' 창</td><td>받은 파일이 맞으면 추가 정보 → 실행. 또는 명령창 방법 사용</td></tr>
+<tr><td>결과가 비었거나 이상함</td><td><code>--확인</code> 으로 파일 정체 → md 머리말의 <code>detected</code> 줄 → <code>_오류.md</code></td></tr>
+<tr><td>변환이 너무 느림</td><td><code>--훑기</code> 로 규모 확인, <code>--맛보기 20</code> 으로 시험. 첫 변환은 100MB 당 1~3분쯤</td></tr>
+<tr><td>프로그램 오류</td><td><code>_변환결과\_오류_상세.log</code> 에 파일별 기록</td></tr>
+<tr><td>코드를 고쳤는데 결과가 그대로</td><td><code>--다시</code>, 또는 <code>engine/pipeline.py</code> 의 <code>ENGINE_VERSION</code> 올리기</td></tr>
+</tbody></table></div>
+
+<h3>글자 인식 (선택)</h3>
+<p>사진과 스캔 PDF 는 글자가 '그림' 이라 그냥은 읽을 수 없습니다. 기본은 꺼져 있고, 켜면 전에 못 읽은 파일만 다시 시도합니다.</p>
+<div class="tbl"><table><thead><tr><th>엔진</th><th>준비</th><th>특징</th></tr></thead><tbody>
+<tr><td><code>tesseract</code></td><td><code>winget install UB-Mannheim.TesseractOCR</code> (설치 때 Korean 선택) → <code>pip install pytesseract</code></td><td>무료, 내 PC 안에서만 처리</td></tr>
+<tr><td><code>claude</code></td><td><code>pip install anthropic</code> + API 키(<code>ANTHROPIC_API_KEY</code>) 또는 <code>ant auth login</code></td><td>표·손글씨까지 잘 읽음. <b>이미지가 외부로 전송되고 비용이 듦</b></td></tr>
+</tbody></table></div>
+<pre class="cmd" data-label="스캔PDF 다시 시도">python pkos.py ..\흩어진자료 --글자인식 tesseract</pre>
+<div class="note warn"><b class="t">개인정보 자료에는 claude 엔진을 쓰지 마세요</b>
+사진 속 내용이 밖으로 나갑니다. 학생 이름·상담 기록이 든 스캔본은 tesseract 로 처리하세요.</div>
+
+<h3>다음 단계</h3>
+<ul>
+<li>내 수업 자료 폴더의 <b>복사본</b>으로 훑기 → 맛보기 → 전체 변환.</li>
+<li>결과 폴더를 옵시디언 보관함으로 열어 자료 지도를 만들기.</li>
+<li>13블록 코드로 '발표 자료만 모은 목록' 같은 나만의 정리 스크립트 만들기.</li>
+<li>코드를 고쳤다면 <code>python pkos.py --자가진단</code> 으로 확인.</li>
+</ul>`}
+);
+
+const IMG = {"01_python_version": "img/01_python_version.png", "02_before_check": "img/02_before_check.png", "03_setup_done": "img/03_setup_done.png", "04_selftest": "img/04_selftest.png", "05_scan": "img/05_scan.png", "06_wizard_ask": "img/06_wizard_ask.png", "07_wizard_done": "img/07_wizard_done.png", "08_rerun": "img/08_rerun.png", "09_identify": "img/09_identify.png", "10_explorer_tool": "img/10_explorer_tool.png", "11_explorer_result": "img/11_explorer_result.png"};
+const FILES = {"code": {"name": "pkos_자료변환기.zip", "url": "downloads/pkos-converter.zip"}, "demo": {"name": "흩어진자료_예시.zip", "url": "downloads/sample-data.zip"}};   // {name, b64} (한 파일판) 또는 {name, url} (웹 게시판)
+
+const $ = (s, el = document) => el.querySelector(s);
+const $$ = (s, el = document) => [...el.querySelectorAll(s)];
+const KEY = "pkos-edu-v1";
+let state = {done: {}, memo: {}};
+try { state = Object.assign(state, JSON.parse(localStorage.getItem(KEY) || "{}")); } catch (e) {}
+function save() { try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) {} }
+
+function toast(msg) {
+  const t = $("#toast");
+  t.textContent = msg; t.hidden = false;
+  clearTimeout(toast._t); toast._t = setTimeout(() => { t.hidden = true; }, 2200);
+}
+const esc = s => String(s).replace(/[&<>"]/g, c => ({"&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;"}[c]));
+const plain = html => html.replace(/<[^>]+>/g, " ").replace(/&[a-z]+;/g, " ");
+const blockNo = b => b.no === "준비" ? "준비" : b.no;
+const phaseColor = b => PHASES[b.phase].color;
+
+/* ── 목차 ───────────────────────────────────────── */
+function renderNav(filter = "") {
+  const q = filter.trim().toLowerCase();
+  let html = "", lastPhase = "";
+  for (const b of BLOCKS) {
+    if (q && !(b.title + " " + b.desc + " " + plain(b.body)).toLowerCase().includes(q)) continue;
+    if (b.phase !== lastPhase) { html += `<li><span class="ph">${esc(PHASES[b.phase].label)}</span></li>`; lastPhase = b.phase; }
+    html += `<li><a href="#${b.id}" data-id="${b.id}"><span class="no">${esc(blockNo(b))}</span><span>${esc(b.title)}</span><span class="ok">${state.done[b.id] ? "✓" : ""}</span></a></li>`;
+  }
+  $("#nav").innerHTML = html || `<li style="padding:8px;color:var(--ink3);font-size:13px">찾는 내용이 없습니다</li>`;
+  markNav();
+}
+function markNav() {
+  const id = location.hash.slice(1);
+  $$("#nav a").forEach(a => a.classList.toggle("on", a.dataset.id === id));
+}
+function renderProgress() {
+  const n = BLOCKS.filter(b => state.done[b.id]).length;
+  $("#progTxt").textContent = `${n} / ${BLOCKS.length}`;
+  $("#progBar").style.width = `${Math.round(n / BLOCKS.length * 100)}%`;
+}
+
+/* ── 첫 화면 ───────────────────────────────────── */
+function renderHome() {
+  const shots = Object.keys(IMG).length;
+  let cards = "";
+  for (const [ph, info] of Object.entries(PHASES)) {
+    cards += `<h3 class="phase-h"><i style="background:var(--${info.color})"></i>${esc(info.label)}</h3><div class="grid">`;
+    for (const b of BLOCKS.filter(x => x.phase === ph)) {
+      cards += `<a class="bcard c-${info.color}" href="#${b.id}">
+        <span class="no">BLOCK ${esc(blockNo(b))}</span>${state.done[b.id] ? '<span class="done">✓ 완료</span>' : ""}
+        <h3>${esc(b.title)}</h3><p>${esc(b.desc)}</p><span class="meta">${esc(b.meta)}</span></a>`;
+    }
+    cards += `</div>`;
+  }
+  return `
+  <section class="hero">
+    <span class="tag">멀티미디어 프로그래밍 · 파이썬 실습</span>
+    <h2>흩어진 자료를<br>마크다운으로 바꾸다.</h2>
+    <p>설치부터 변환, 결과 읽기, 코드로 직접 쓰기까지. 이 PC 에서 명령을 실제로 실행하며 찍은 화면으로 한 블록씩 따라 합니다.</p>
+    <div class="stats">
+      <div><b>14 + 준비</b><span>학습 블록</span></div>
+      <div><b>${shots}</b><span>실제 화면 사진</span></div>
+      <div><b>126</b><span>자가진단 항목</span></div>
+      <div><b>2</b><span>내려받는 zip</span></div>
+    </div>
+    <div class="studs" aria-hidden="true">${"<i></i>".repeat(8)}</div>
+  </section>
+  <section class="card start">
+    <div><span class="pill">처음이라면 여기부터</span>
+      <h3>코드를 받아 풀고,<br>파이썬부터 확인한다.</h3>
+      <p style="margin:0;color:var(--ink2)">받은 zip 두 개를 <code>C:\\pkos_실습</code> 에 풀면 교재의 명령과 사진이 그대로 맞습니다.</p></div>
+    <div class="acts">
+      <a class="btn blue" href="#s00">준비 · 코드와 실습 자료 받기</a>
+      <a class="btn" href="#s02">이미 받았다면 파이썬 확인</a>
+    </div>
+  </section>
+  <div class="two">
+    <div class="card"><h3>오늘 완성할 것</h3><p>라이브러리를 설치하고 자가진단 126개 통과를 확인한 뒤, 실습 자료 17개를 변환해 INDEX.md 로 결과를 읽는다. 마지막에 파이썬 코드로 같은 일을 해 본다.</p></div>
+    <div class="card"><h3>막히면</h3><p>사진의 화면과 내 화면을 한 줄씩 대조한다. 오류 문장을 그대로 메모에 남기고 14블록의 증상표에서 찾는다.</p></div>
+  </div>
+  ${cards}`;
+}
+
+/* ── 블록 ─────────────────────────────────────── */
+function blockHTML(b, withNav) {
+  const i = BLOCKS.indexOf(b), prev = BLOCKS[i - 1], next = BLOCKS[i + 1];
+  const nav = withNav ? `<div class="pn">
+      ${prev ? `<a class="btn" href="#${prev.id}">← 이전 · ${esc(prev.title)}</a>` : `<a class="btn" href="#home">← 학습 지도</a>`}
+      ${next ? `<a class="btn yellow" href="#${next.id}">다음 · ${esc(next.title)} →</a>` : `<a class="btn yellow" href="#home">학습 지도로 →</a>`}
+    </div>` : "";
+  return `<article data-block="${b.id}">
+    <header class="bhead ${phaseColor(b)}">
+      <div class="no">${b.no === "준비" ? "준비 블록" : `BLOCK ${esc(b.no)} / 14`}</div>
+      <h2>${esc(b.title)}</h2>
+      <p>학습 목표 · ${esc(b.goal)}</p>
+    </header>
+    <div class="bbody card">${b.body}</div>
+    <section class="turn">
+      <h3>내 차례</h3>
+      <label for="done-${b.id}"><input type="checkbox" id="done-${b.id}" data-done="${b.id}" ${state.done[b.id] ? "checked" : ""}><span>${esc(b.turn)}</span></label>
+    </section>
+    <div class="memo"><label for="memo-${b.id}">내 메모 · 오류 문장이나 확인한 결과를 적습니다 (이 브라우저에만 저장)</label>
+      <textarea id="memo-${b.id}" data-memo="${b.id}" placeholder="예: python --version → Python 3.14.7">${esc(state.memo[b.id] || "")}</textarea></div>
+    ${nav}
+  </article>`;
+}
+
+function enhance(root) {
+  $$("figure.shot[data-img]", root).forEach(f => {
+    const [t, d] = (f.dataset.cap || "").split("|");
+    const src = IMG[f.dataset.img];
+    if (!src) return;
+    f.innerHTML = `<button type="button" aria-label="${esc(t)} 크게 보기"><img src="${src}" alt="${esc(t + " — " + (d || ""))}" loading="lazy"></button>
+      <figcaption><b>${esc(t)}</b>${esc(d || "")}</figcaption>`;
+    f.querySelector("button").addEventListener("click", () => openLb(src, t));
+  });
+  $$("pre.cmd", root).forEach(p => {
+    if (p.querySelector(".copy")) return;
+    const text = p.textContent.replace(/^\n/, "");
+    const btn = document.createElement("button");
+    btn.className = "copy"; btn.type = "button"; btn.textContent = "복사";
+    btn.addEventListener("click", () => copyText(text, btn));
+    p.appendChild(btn);
+  });
+}
+
+function route() {
+  const id = location.hash.slice(1) || "home";
+  const view = $("#view");
+  const b = BLOCKS.find(x => x.id === id);
+  if (b) {
+    view.innerHTML = blockHTML(b, true);
+    $("#crumb").textContent = `BLOCK ${blockNo(b)} · ${b.title}`;
+  } else if (id === "all") {
+    view.innerHTML = BLOCKS.map(x => blockHTML(x, false)).join('<div class="all-sep"></div>');
+    $("#crumb").textContent = "전체 보기";
+  } else {
+    view.innerHTML = renderHome();
+    $("#crumb").textContent = "학습 지도";
+  }
+  enhance(view);
+  markNav();
+  $("#side").classList.remove("open");
+  window.scrollTo(0, 0);
+}
+
+/* ── 저장 · 입력 ──────────────────────────────── */
+document.addEventListener("change", e => {
+  const id = e.target.dataset && e.target.dataset.done;
+  if (!id) return;
+  state.done[id] = e.target.checked; save();
+  renderProgress(); renderNav($("#q").value);
+  if (e.target.checked) toast("완료로 표시했습니다");
+});
+let memoTimer;
+document.addEventListener("input", e => {
+  const id = e.target.dataset && e.target.dataset.memo;
+  if (!id) return;
+  state.memo[id] = e.target.value;
+  clearTimeout(memoTimer); memoTimer = setTimeout(save, 400);
+});
+$("#q").addEventListener("input", e => renderNav(e.target.value));
+$("#menuBtn").addEventListener("click", () => $("#side").classList.toggle("open"));
+$("#nav").addEventListener("click", e => { if (e.target.closest("a")) $("#side").classList.remove("open"); });
+
+/* ── 복사 ─────────────────────────────────────── */
+async function copyText(text, btn) {
+  let ok = false;
+  try { await navigator.clipboard.writeText(text); ok = true; } catch (e) {
+    const ta = document.createElement("textarea");
+    ta.value = text; ta.style.position = "fixed"; ta.style.opacity = "0";
+    document.body.appendChild(ta); ta.select();
+    try { ok = document.execCommand("copy"); } catch (e2) { ok = false; }
+    ta.remove();
+  }
+  btn.textContent = ok ? "복사됨" : "직접 선택해 복사";
+  setTimeout(() => { btn.textContent = "복사"; }, 1600);
+}
+
+/* ── 사진 확대 ────────────────────────────────── */
+function openLb(src, alt) { $("#lbImg").src = src; $("#lbImg").alt = alt; $("#lb").hidden = false; $("#lbX").focus(); }
+function closeLb() { $("#lb").hidden = true; $("#lbImg").src = ""; }
+$("#lb").addEventListener("click", e => { if (e.target.id !== "lbImg") closeLb(); });
+document.addEventListener("keydown", e => { if (e.key === "Escape" && !$("#lb").hidden) closeLb(); });
+
+/* ── 내려받기 ─────────────────────────────────── */
+function b64ToBlob(b64) {
+  const bin = atob(b64), arr = new Uint8Array(bin.length);
+  for (let i = 0; i < bin.length; i++) arr[i] = bin.charCodeAt(i);
+  return new Blob([arr]);
+}
+let dlApi;
+const dlReady = (window.claude && window.claude.use) ? window.claude.use("downloads").then(x => (dlApi = x)).catch(() => null) : Promise.resolve(null);
+async function offer(filename, data) {
+  await dlReady;
+  if (dlApi) {
+    try { await dlApi.save({filename, data}); toast("저장했습니다"); }
+    catch (e) {
+      if (e && e.code === "declined") toast("저장을 취소했습니다");
+      else if (e && e.code === "rate_limited") toast("이미 저장 창이 열려 있습니다");
+      else toast("이 화면에서는 저장할 수 없습니다");
+    }
+    return;
+  }
+  const url = URL.createObjectURL(data instanceof Blob ? data : new Blob([data], {type: "text/markdown"}));
+  const a = document.createElement("a");
+  a.href = url; a.download = filename; document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 5000);
+}
+document.addEventListener("click", e => {
+  const b = e.target.closest("[data-dl]");
+  if (!b) return;
+  const f = FILES[b.dataset.dl];
+  if (f.url) {                       // 웹 게시판 — 같은 사이트의 파일을 그대로 받는다
+    const a = document.createElement("a");
+    a.href = f.url; a.download = f.name; document.body.appendChild(a); a.click(); a.remove();
+    if (inFrame) toast("받기가 시작되지 않으면 오른쪽 위 '새 창' 에서 받으세요");
+    return;
+  }
+  offer(f.name, b64ToBlob(f.b64));
+});
+
+// 구글 사이트처럼 다른 페이지 안에 끼워 넣었을 때 — 새 창으로 여는 단추
+let inFrame = false;
+try { inFrame = window.self !== window.top; } catch (e) { inFrame = true; }
+if (inFrame && /^https?:/.test(location.protocol)) {
+  const a = document.createElement("a");
+  a.className = "btn"; a.href = location.href.split("#")[0]; a.target = "_blank"; a.rel = "noopener";
+  a.textContent = "새 창 ↗";
+  $(".top").appendChild(a);
+}
+$("#exportBtn").addEventListener("click", () => {
+  const d = new Date();
+  const stamp = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+  const n = BLOCKS.filter(b => state.done[b.id]).length;
+  const L = [`# 자료변환기 실습 기록`, ``, `- 내보낸 날: ${stamp}`, `- 완료: ${n} / ${BLOCKS.length}`, ``];
+  for (const b of BLOCKS) {
+    L.push(`## ${state.done[b.id] ? "[x]" : "[ ]"} BLOCK ${blockNo(b)} · ${b.title}`, ``, `- 확인: ${b.turn}`);
+    const m = (state.memo[b.id] || "").trim();
+    L.push(m ? `- 메모:\n\n${m.split("\n").map(x => "    " + x).join("\n")}` : `- 메모: (없음)`, ``);
+  }
+  offer(`자료변환기_학습기록_${stamp}.md`, L.join("\n"));
+});
+
+window.addEventListener("hashchange", route);
+renderNav(); renderProgress(); route();
+
+</script>
+</body>
+</html>
